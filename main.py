@@ -3,6 +3,7 @@ import operator
 import os
 
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ParseMode
@@ -21,7 +22,7 @@ load_dotenv()
 
 API_TOKEN = os.getenv("BOT_TOKEN")
 
-WEBHOOK_HOST = 'https://7c2e-188-170-84-45.ngrok.io'
+WEBHOOK_HOST = 'https://1d19-146-120-77-82.ngrok.io'
 
 m = hashlib.sha256()
 m.update(bytes(API_TOKEN, encoding="utf8"))
@@ -88,14 +89,14 @@ async def go_back(c: CallbackQuery, button: Button, manager: DialogManager):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
+    storage = RedisStorage(host='localhost', port=6379)
+    # storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
     bot = Bot(token=API_TOKEN)
     dp = Dispatcher(bot, storage=storage)
     dp.middleware.setup(LoggingMiddleware())
     registry = DialogRegistry(dp)
 
     questions = upload_faq("faq.txt")
-
 
     async def on_question_click(c: CallbackQuery, button: Button, manager: DialogManager):
         print(button.widget_id)
@@ -105,7 +106,6 @@ if __name__ == '__main__':
         await c.answer()
         print(manager.current_context().dialog_data)
         await manager.dialog().switch_to(DialogSG.question_details)
-
 
     questions_dialog = Dialog(
         Window(
