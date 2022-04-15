@@ -22,7 +22,7 @@ load_dotenv()
 
 API_TOKEN = os.getenv("BOT_TOKEN")
 
-WEBHOOK_HOST = 'https://1d19-146-120-77-82.ngrok.io'
+WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 
 m = hashlib.sha256()
 m.update(bytes(API_TOKEN, encoding="utf8"))
