@@ -89,8 +89,9 @@ async def go_back(c: CallbackQuery, button: Button, manager: DialogManager):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    storage = RedisStorage(host='localhost', port=6379)
-    # storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
+    # storage = RedisStorage(host='localhost', port=6379)
+    storage = MongoStorage()
+    storage._uri = os.getenv("DB_CONNECTION_STRING")
     bot = Bot(token=API_TOKEN)
     dp = Dispatcher(bot, storage=storage)
     dp.middleware.setup(LoggingMiddleware())
