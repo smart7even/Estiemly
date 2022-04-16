@@ -76,7 +76,10 @@ multi = Multiselect(
 
 async def periodic():
     while True:
-        requests.get(WEBHOOK_URL)
+        print(f"Pinging {WEBHOOK_URL}")
+        result = requests.get(WEBHOOK_URL, timeout=10)
+        print(f"Pinged {WEBHOOK_URL}")
+        print(result.status_code)
         await asyncio.sleep(PREVENT_SLEEP_HEROKU_PING_INTERVAL_IN_SECONDS)
 
 
