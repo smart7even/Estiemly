@@ -1,7 +1,9 @@
+import asyncio
 import logging
 import operator
 import os
 
+import requests
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -23,6 +25,7 @@ load_dotenv()
 API_TOKEN = os.getenv("BOT_TOKEN")
 
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
+PREVENT_SLEEP_HEROKU_PING_INTERVAL_IN_SECONDS = 60 * 5
 
 m = hashlib.sha256()
 m.update(bytes(API_TOKEN, encoding="utf8"))
@@ -71,8 +74,16 @@ multi = Multiselect(
 )
 
 
+async def periodic():
+    while True:
+        requests.get(WEBHOOK_URL)
+        await asyncio.sleep(PREVENT_SLEEP_HEROKU_PING_INTERVAL_IN_SECONDS)
+
+
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
+    loop = asyncio.get_event_loop()
+    loop.create_task(periodic())
 
 
 async def on_shutdown(dp):
@@ -99,6 +110,7 @@ if __name__ == '__main__':
 
     questions = upload_faq("faq.txt")
 
+
     async def on_question_click(c: CallbackQuery, button: Button, manager: DialogManager):
         print(button.widget_id)
         question = questions[int(button.widget_id)]
@@ -107,6 +119,7 @@ if __name__ == '__main__':
         await c.answer()
         print(manager.current_context().dialog_data)
         await manager.dialog().switch_to(DialogSG.question_details)
+
 
     questions_dialog = Dialog(
         Window(
