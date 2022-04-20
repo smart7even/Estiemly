@@ -1,11 +1,8 @@
-import asyncio
 import logging
 import operator
 import os
 
-import requests
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
-from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ParseMode
@@ -74,19 +71,10 @@ multi = Multiselect(
 )
 
 
-async def periodic():
-    while True:
-        print(f"Pinging {WEBHOOK_URL}")
-        result = requests.get(WEBHOOK_URL, timeout=10)
-        print(f"Pinged {WEBHOOK_URL}")
-        print(result.status_code)
-        await asyncio.sleep(PREVENT_SLEEP_HEROKU_PING_INTERVAL_IN_SECONDS)
-
-
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
-    loop = asyncio.get_event_loop()
-    loop.create_task(periodic())
+    # loop = asyncio.get_event_loop()
+    # loop.create_task(periodic())
 
 
 async def on_shutdown(dp):
