@@ -1,6 +1,28 @@
 version: "3.9"
 services:
+  traefik:
+    image: "traefik:v2.6"
+    container_name: "traefik"
+    ports:
+      - "443:443"
+      - "8080:8080"
+    command:
+      - "--log.level=DEBUG"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=smart7even@yandex.ru"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
   bot:
     build: .
-    ports:
-      - "5000:5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.bot.loadbalancer.server.port=443"
+      - "traefik.http.routers.bot.rule=Host(`smart7even.ru`)"
+      - "traefik.http.routers.bot.entrypoints=websecure"
+      - "traefik.http.routers.bot.tls.certresolver=myresolver"
