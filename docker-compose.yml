@@ -7,7 +7,7 @@ services:
       - "443:443"
       - "8080:8080"
     command:
-      #- "--log.level=DEBUG"
+      - "--log.level=DEBUG"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.websecure.address=:443"
@@ -22,7 +22,7 @@ services:
     build: .
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.bot.loadbalancer.server.port=80"
+      - "traefik.http.services.bot.loadbalancer.server.port=443"
       - "traefik.http.routers.bot.rule=Host(`smart7even.ru`)"
       - "traefik.http.routers.bot.entrypoints=websecure"
       - "traefik.http.routers.bot.tls.certresolver=myresolver"

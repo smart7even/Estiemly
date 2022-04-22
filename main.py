@@ -37,7 +37,7 @@ WEBAPP_PORT = os.getenv("PORT", 5000)
 
 logging.basicConfig(level=logging.INFO)
 logging.info(f"Starting webhook at {WEBHOOK_URL}")
-
+logging.info(f"App port {WEBAPP_PORT}")
 
 class DialogSG(StatesGroup):
     greeting = State()
