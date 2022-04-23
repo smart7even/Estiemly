@@ -16,9 +16,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: executing remote ssh commands using password
+    - name: Deploy to VPS
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
