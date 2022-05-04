@@ -4,16 +4,18 @@ import os
 
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, ParseMode
+from aiogram.types import Message, CallbackQuery, ParseMode, ReplyKeyboardMarkup
 from aiogram.utils.executor import start_webhook
-from aiogram_dialog import DialogManager, DialogRegistry, Dialog, Window
+from aiogram_dialog import DialogManager, DialogRegistry, Dialog, Window, StartMode
 from aiogram_dialog.widgets.kbd import Button, Multiselect, Row
+from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Format, Const
 from dotenv import load_dotenv
 import hashlib
 
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
 
 from faq_catalog import upload_faq
 
@@ -39,7 +41,10 @@ logging.basicConfig(level=logging.INFO)
 logging.info(f"Starting webhook at {WEBHOOK_URL}")
 logging.info(f"App port {WEBAPP_PORT}")
 
+
 class DialogSG(StatesGroup):
+    initial = State()
+    merch = State()
     greeting = State()
     question_details = State()
 
@@ -103,6 +108,23 @@ if __name__ == '__main__':
     questions = upload_faq("faq.txt")
 
 
+    @dp.message_handler(commands=['start'])
+    async def cmd_start(message: types.Message, dialog_manager: DialogManager):
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+        markup.add("Merch", "Вопросы к LR")
+
+        await bot.send_message(message.chat.id,
+                               text="Привет. Я Estiemly. Сейчас у тебя внизу появятся кнопки, посмотри что там",
+                               reply_markup=markup)
+
+
+    @dp.message_handler(lambda message: message.text in ["Merch", "Вопросы к LR"])
+    async def initial_start(message: types.Message, dialog_manager: DialogManager):
+        if message.text == "Merch":
+            await dialog_manager.start(DialogSG.merch, mode=StartMode.NEW_STACK)
+        elif message.text == "Вопросы к LR":
+            await dialog_manager.start(DialogSG.greeting, mode=StartMode.NEW_STACK)
+
     async def on_question_click(c: CallbackQuery, button: Button, manager: DialogManager):
         print(button.widget_id)
         question = questions[int(button.widget_id)]
@@ -114,6 +136,34 @@ if __name__ == '__main__':
 
 
     questions_dialog = Dialog(
+        Window(
+            Format("""
+            Наш мерч уже готов! 😍
+
+Столь ожидаемое нововведение уже на финальной стадии, и мы с гордостью объявляем официальный прием заявок! 🎉
+
+У нас весьма богатый выбор!😉
+
+Тебе будут доступны футболки, худи, шопперы, маски, обложки на паспорт и значки 👕
+
+Мы долго работали над нашим мерчем, и теперь ты сможешь всем показывать, что ты гордый член нашей локальной группы и выделяться из толпы! 🤍
+
+Выбирай понравившейся тебе вариант и кидай нам свою заявку!💚
+
+Сайт, где ты можешь посмотреть наш ассортимент ⬇️
+https://elvirakhalaleeva.wixsite.com/lg-merch
+
+Форма, где ты можешь выбрать, что ты хочешь заказать ⬇️
+https://docs.google.com/forms/d/e/1FAIpQLSflWeVs2El6ZdPsxILEILeSox7tv7nwR8446f0s3f29Q_miIA/viewform?usp=sf_link
+
+Тебе точно понравится 💚🤍💚
+
+По вопросам обращайтесь к @Fyodor_Pavlov :)
+"""),
+            StaticMedia(path="assets/merch.jpg"),
+            state=DialogSG.merch,
+        ),
+
         Window(
             Format("Привет! Саша Дронова (Local Responsible LG Spb) подготовила для тебя ответы на частые "
                    "вопросы.\nWatch it to stay tuned 🤟"),
@@ -134,7 +184,7 @@ if __name__ == '__main__':
         ),
     )
 
-    registry.register_start_handler(DialogSG.greeting)
+    registry.register_start_handler(DialogSG.initial)
     registry.register(questions_dialog)
 
     start_webhook(
