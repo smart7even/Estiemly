@@ -2,6 +2,7 @@ import logging
 import operator
 import os
 
+from aiogram import executor
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import FSMContext
@@ -107,16 +108,15 @@ if __name__ == '__main__':
 
     questions = upload_faq("faq.txt")
 
-
     @dp.message_handler(commands=['start'])
     async def cmd_start(message: types.Message, dialog_manager: DialogManager):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+        markup = types.ReplyKeyboardMarkup(
+            resize_keyboard=True, selective=True)
         markup.add("Merch", "Вопросы к LR")
 
         await bot.send_message(message.chat.id,
                                text="Привет. Я Estiemly. Сейчас у тебя внизу появятся кнопки, посмотри что там",
                                reply_markup=markup)
-
 
     @dp.message_handler(lambda message: message.text in ["Merch", "Вопросы к LR"])
     async def initial_start(message: types.Message, dialog_manager: DialogManager):
@@ -133,7 +133,6 @@ if __name__ == '__main__':
         await c.answer()
         print(manager.current_context().dialog_data)
         await manager.dialog().switch_to(DialogSG.question_details)
-
 
     questions_dialog = Dialog(
         Window(
@@ -187,12 +186,15 @@ https://docs.google.com/forms/d/e/1FAIpQLSflWeVs2El6ZdPsxILEILeSox7tv7nwR8446f0s
     registry.register_start_handler(DialogSG.initial)
     registry.register(questions_dialog)
 
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT,
-    )
+    if os.getenv('USE_WEBHOOK') == "true":
+        start_webhook(
+            dispatcher=dp,
+            webhook_path=WEBHOOK_PATH,
+            on_startup=on_startup,
+            on_shutdown=on_shutdown,
+            skip_updates=True,
+            host=WEBAPP_HOST,
+            port=WEBAPP_PORT,
+        )
+    else:
+        executor.start_polling(dp, skip_updates=True)
