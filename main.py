@@ -48,6 +48,8 @@ class DialogSG(StatesGroup):
     merch = State()
     greeting = State()
     question_details = State()
+    stickerpack = State()
+    vocabulary = State()
 
 
 async def get_data(dialog_manager: DialogManager, **kwargs):
@@ -112,18 +114,24 @@ if __name__ == '__main__':
     async def cmd_start(message: types.Message, dialog_manager: DialogManager):
         markup = types.ReplyKeyboardMarkup(
             resize_keyboard=True, selective=True)
-        markup.add("Merch", "Вопросы к LR")
+        markup.add("Merch", "Вопросы к LR", "Стикерпак", "Словарик")
 
         await bot.send_message(message.chat.id,
                                text="Привет. Я Estiemly. Сейчас у тебя внизу появятся кнопки, посмотри что там",
                                reply_markup=markup)
 
-    @dp.message_handler(lambda message: message.text in ["Merch", "Вопросы к LR"])
+
+    @dp.message_handler(lambda message: message.text in ["Merch", "Вопросы к LR", "Стикерпак", "Словарик"])
     async def initial_start(message: types.Message, dialog_manager: DialogManager):
         if message.text == "Merch":
             await dialog_manager.start(DialogSG.merch, mode=StartMode.NEW_STACK)
         elif message.text == "Вопросы к LR":
             await dialog_manager.start(DialogSG.greeting, mode=StartMode.NEW_STACK)
+        elif message.text == "Стикерпак":
+            await dialog_manager.start(DialogSG.stickerpack, mode=StartMode.NEW_STACK)
+        elif message.text == "Словарик":
+            await dialog_manager.start(DialogSG.vocabulary, mode=StartMode.NEW_STACK)
+
 
     async def on_question_click(c: CallbackQuery, button: Button, manager: DialogManager):
         print(button.widget_id)
@@ -133,6 +141,7 @@ if __name__ == '__main__':
         await c.answer()
         print(manager.current_context().dialog_data)
         await manager.dialog().switch_to(DialogSG.question_details)
+
 
     questions_dialog = Dialog(
         Window(
@@ -178,6 +187,23 @@ https://docs.google.com/forms/d/e/1FAIpQLSflWeVs2El6ZdPsxILEILeSox7tv7nwR8446f0s
                 Button(Const("Back"), id="back2", on_click=go_back),
             ),
             state=DialogSG.question_details,
+            getter=get_data,
+            parse_mode=ParseMode.HTML
+        ),
+        Window(
+            Format("<b>Стикерпак</b>"),
+            Format("У нас есть классные стикеры только для тебя!\n"),
+            Format("Забирай по тапу сюда: https://t.me/addstickers/ESTIckers2021"),
+            state=DialogSG.stickerpack,
+            getter=get_data,
+            parse_mode=ParseMode.HTML
+        ),
+        Window(
+            Format("<b>Словарик</b>"),
+            Format("А еще у нас есть мини-словарик со специальной лексикой для начинающего ESTIEM’eра.\n"),
+            Format(
+                "Забирай по тапу сюда: https://drive.google.com/file/d/1mP-Pb_IxGBTbKd6Zyw3Q9IsIPCxRKW8L/view?usp=sharing"),
+            state=DialogSG.vocabulary,
             getter=get_data,
             parse_mode=ParseMode.HTML
         ),
