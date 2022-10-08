@@ -200,7 +200,7 @@ https://docs.google.com/forms/d/e/1FAIpQLSflWeVs2El6ZdPsxILEILeSox7tv7nwR8446f0s
         ),
         Window(
             Format("<b>Словарик</b>"),
-            Format("А еще у нас есть мини-словарик со специальной лексикой для начинающего ESTIEM’eра.\n"),
+            Format("А еще у нас есть мини-словарик со специальной лексикой для начинающего ESTIEM’eра!\n"),
             Format(
                 "Забирай по тапу сюда: https://drive.google.com/file/d/1mP-Pb_IxGBTbKd6Zyw3Q9IsIPCxRKW8L/view?usp=sharing"),
             state=DialogSG.vocabulary,
