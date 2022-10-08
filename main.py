@@ -164,7 +164,7 @@ https://docs.google.com/forms/d/e/1FAIpQLSflWeVs2El6ZdPsxILEILeSox7tv7nwR8446f0s
         ),
 
         Window(
-            Format("Привет! Саша Дронова (Local Responsible LG Spb) подготовила для тебя ответы на частые "
+            Format("Привет! Олеся Гладкоскок (Local Responsible LG Spb) подготовила для тебя ответы на частые "
                    "вопросы.\nWatch it to stay tuned 🤟"),
             *[Button(Const(f"{questions[i].question}"), id=f"{i}", on_click=on_question_click) for i in
               range(len(questions))],
