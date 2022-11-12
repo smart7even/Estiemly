@@ -27,4 +27,4 @@ jobs:
             cd estiemly
             git switch main
             git pull origin main
-            docker compose -f docker-compose-long-polling.yml up --build -d
+            docker compose -f docker-compose-long-polling.yml up --build -d --force-recreate
