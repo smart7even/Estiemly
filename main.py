@@ -18,7 +18,7 @@ import hashlib
 
 from aiogram import Bot, Dispatcher, types
 
-from faq_catalog import upload_faq
+from faq_catalog import download_faq
 
 load_dotenv()
 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     dp.middleware.setup(LoggingMiddleware())
     registry = DialogRegistry(dp)
 
-    questions = upload_faq("faq.txt")
+    questions = download_faq("assets/texts/faq.txt")
 
     @dp.message_handler(commands=['start'])
     async def cmd_start(message: types.Message, dialog_manager: DialogManager):
@@ -142,30 +142,13 @@ if __name__ == '__main__':
         print(manager.current_context().dialog_data)
         await manager.dialog().switch_to(DialogSG.question_details)
 
+    merch_text_file = open("assets/texts/merch.txt")
+    merch_text = merch_text_file.read()
+    merch_text_file.close()
 
     questions_dialog = Dialog(
         Window(
-            Format("""
-Наш мерч уже готов, мы с гордостью объявляем официальный прием заявок! 🎉
-
-У нас весьма богатый выбор!😉
-
-Тебе будут доступны футболки, худи, шопперы, термокружки, обложки на паспорт и значки 👕
-
-Мы долго работали над нашим мерчем, и теперь ты сможешь всем показать, что ты гордый член нашей локальной группы и выделяться из толпы! 🤍
-
-Выбирай понравившейся тебе вариант и кидай нам свою заявку!💚
-
-Каталог товаров⬇️
-https://drive.google.com/file/d/1AV4OpT1UD6fWVJSiyTavshaEvVzFbBjc/view?usp=sharing
-
-Форма, где ты можешь выбрать, что ты хочешь заказать ⬇️
-https://forms.gle/JhfB6KvrRqoRePcc8
-
-Тебе точно понравится 💚🤍💚
-
-По вопросам обращайтесь к @Fyodor_Pavlov :)
-"""),
+            Format(merch_text),
             StaticMedia(path="assets/merch2.jpg"),
             state=DialogSG.merch,
         ),

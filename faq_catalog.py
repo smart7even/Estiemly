@@ -7,7 +7,7 @@ class Question:
     answer: str
 
 
-def upload_faq(filename: str) -> list[Question]:
+def download_faq(filename: str) -> list[Question]:
     with open(filename, encoding="utf8") as file:
         content = file.readlines()
         questions: list[Question] = []
@@ -19,4 +19,4 @@ def upload_faq(filename: str) -> list[Question]:
 
 
 if __name__ == "__main__":
-    upload_faq("faq.txt")
+    download_faq("assets/texts/faq.txt")
