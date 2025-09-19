@@ -15,6 +15,7 @@ from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Format, Const
 from dotenv import load_dotenv
 import hashlib
+from aiogram.contrib.fsm_storage.files import JSONStorage
 
 from aiogram import Bot, Dispatcher, types
 
@@ -23,6 +24,7 @@ from faq_catalog import download_faq
 load_dotenv()
 
 API_TOKEN = os.getenv("BOT_TOKEN")
+USE_FILE_STORAGE = os.getenv("USE_FILE_STORAGE", "false").lower() == "true"
 
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 PREVENT_SLEEP_HEROKU_PING_INTERVAL_IN_SECONDS = 60 * 5
@@ -101,8 +103,13 @@ async def go_back(c: CallbackQuery, button: Button, manager: DialogManager):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     # storage = RedisStorage(host='localhost', port=6379)
-    storage = MongoStorage()
-    storage._uri = os.getenv("DB_CONNECTION_STRING")
+    storage = None
+
+    if USE_FILE_STORAGE:
+        storage = JSONStorage(path="fsm_storage")
+    else:
+        storage = MongoStorage()
+        storage._uri = os.getenv("DB_CONNECTION_STRING")
     bot = Bot(token=API_TOKEN)
     dp = Dispatcher(bot, storage=storage)
     dp.middleware.setup(LoggingMiddleware())
@@ -120,7 +127,6 @@ if __name__ == '__main__':
                                text="Привет. Я Estiemly. Сейчас у тебя внизу появятся кнопки, посмотри что там",
                                reply_markup=markup)
 
-
     @dp.message_handler(lambda message: message.text in ["Merch", "Вопросы к LR", "Стикерпак", "Словарик"])
     async def initial_start(message: types.Message, dialog_manager: DialogManager):
         if message.text == "Merch":
@@ -131,7 +137,6 @@ if __name__ == '__main__':
             await dialog_manager.start(DialogSG.stickerpack, mode=StartMode.NEW_STACK)
         elif message.text == "Словарик":
             await dialog_manager.start(DialogSG.vocabulary, mode=StartMode.NEW_STACK)
-
 
     async def on_question_click(c: CallbackQuery, button: Button, manager: DialogManager):
         print(button.widget_id)
@@ -181,7 +186,8 @@ if __name__ == '__main__':
         ),
         Window(
             Format("<b>Словарик</b>"),
-            Format("А еще у нас есть мини-словарик со специальной лексикой для начинающего ESTIEM’eра!\n"),
+            Format(
+                "А еще у нас есть мини-словарик со специальной лексикой для начинающего ESTIEM’eра!\n"),
             Format(
                 "Забирай по тапу сюда: https://drive.google.com/file/d/1mP-Pb_IxGBTbKd6Zyw3Q9IsIPCxRKW8L/view?usp=sharing"),
             state=DialogSG.vocabulary,
